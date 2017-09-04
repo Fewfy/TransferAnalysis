@@ -1,0 +1,29 @@
+- TransferNews
+  - 抓取转会新闻
+  - 分发转会新闻
+  - 分割转会新闻
+- PlayerData
+  - 球员基本信息
+  - 球员数据
+- NewsMiner
+  - 多线程
+  - 抽取球员转会重要信息
+- Analysis
+  - 抽象类
+  - 计算球员的能力值
+- ForwardAnalysis
+  - 前锋类分析
+  - 继承自Analysis
+  - 按前锋的数据进行分析
+- MidfieldAnalysis
+  - 中场类分析
+  - 继承自Analysis
+  - 按中场的数据进行分析
+- GuardAnalysis
+  - 后卫类分析
+  - 继承自Analysis
+  - 按后卫的数据进行分析
+- GoalkeeperAnalysis
+  - 门将类分析
+  - 继承自Analysis
+  - 按门将的数据进行分析
