@@ -3,5 +3,6 @@ package com.fy.TransferAnalysis.Analysis;
 /**
  * Created by fy on 17-9-4.
  */
-public class Analysis {
+public abstract class Analysis {
+
 }
