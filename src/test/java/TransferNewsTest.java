@@ -9,6 +9,6 @@ public class TransferNewsTest {
     @Test
     public void test()throws Exception{
         TransferNews.getInstance().getTransferNews();
-        TransferNews.getInstance().splitNews();
+        TransferNews.getInstance().splitNewsContent();
     }
 }

@@ -18,11 +18,18 @@ import org.apache.http.impl.cookie.DefaultCookieSpec;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.print.URIException;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -43,19 +50,23 @@ public class TransferNews {
     public static CookieStore cookieStore;
     /*获取转会新闻标题正则表达式*/
     private static String titleRegex = "(<h3>[^<]*)?(<a target=\"_blank\" href=)(.*)?(>)([^<]*)(</a>)([^<]*)?</h3>";
+    /*获取转会新闻主体正则表达式*/
+    private static String contentRegex = "<div class=\"artical-main-content\">(.|\n)*</div>";
     /*转会新闻标题*/
     private static List<String> titles;
+    /*新闻主体*/
+    private static List<String> newsContent;
     /*转会新闻html*/
     private String content;
 
-    public static TransferNews getInstance(){
-        if(instance == null){
+    public static TransferNews getInstance() {
+        if (instance == null) {
             instance = new TransferNews();
         }
         return instance;
     }
 
-    public void getTransferNews() throws ClientProtocolException,IOException,URISyntaxException{
+    public void getTransferNews() throws ClientProtocolException, IOException, URISyntaxException {
 
         cookieStore = new BasicCookieStore();
         CookieSpecProvider myCookie = new CookieSpecProvider() {
@@ -63,33 +74,44 @@ public class TransferNews {
                 return new DefaultCookieSpec();
             }
         };
-        Registry<CookieSpecProvider> registry = RegistryBuilder.<CookieSpecProvider> create().register("myCookie", myCookie)
+        Registry<CookieSpecProvider> registry = RegistryBuilder.<CookieSpecProvider>create().register("myCookie", myCookie)
                 .build();
         client = HttpClients.custom().setDefaultCookieStore(cookieStore).setDefaultCookieSpecRegistry(registry).build();
         HttpGet get = new HttpGet();
         get.setURI(new URI(transferSite));
         get.setHeader("Host", Config.transferHost);
-        get.setHeader("Accept",Config.Accept);
-        get.setHeader("Accept-Language",Config.Accept_language);
-        get.setHeader("Accept-Encoding",Config.Accept_encoding);
+        get.setHeader("Accept", Config.Accept);
+        get.setHeader("Accept-Language", Config.Accept_language);
+        get.setHeader("Accept-Encoding", Config.Accept_encoding);
 //        get.setHeader(new BasicHeader("Cookie",Config.Cookie));
-        get.setHeader("Connection",Config.Connection);
-        get.setHeader("Upgrade-Insecure-Request",Config.Upgrade_Insecure_Request);
+        get.setHeader("Connection", Config.Connection);
+        get.setHeader("Upgrade-Insecure-Request", Config.Upgrade_Insecure_Request);
         RequestLine requestLine = get.getRequestLine();
 
         HttpResponse response = client.execute(get);
         HttpEntity entity = response.getEntity();
         this.content = EntityUtils.toString(entity);
+
     }
 
-    public void splitNews(){
+    public void splitNewsTitles() {
         this.titles = new ArrayList<String>();
         Pattern titlePattern = Pattern.compile(titleRegex);
         Matcher matcher = titlePattern.matcher(this.content);
-        while(matcher.find()){
+        while (matcher.find()) {
             String result = matcher.group(5);
-            System.out.println(result);
             titles.add(result);
+        }
+    }
+
+    public void splitNewsContent(){
+        this.newsContent = new ArrayList<String>();
+        /*抓取新闻主体*/
+        Document document = Jsoup.parse(content);
+        Elements elements = document.select("div.artical-main-content");
+        for(Element e : elements){
+            newsContent.add(e.text());
+            System.out.println(e.text());
         }
     }
 
